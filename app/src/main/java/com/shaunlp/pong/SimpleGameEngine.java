@@ -1,12 +1,12 @@
 package com.shaunlp.pong;
 
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -39,9 +39,6 @@ public class SimpleGameEngine extends Activity {
 
         Paddle paddle;
         Ball ball;
-
-        boolean isMoving = false;
-
 
         public GameView(Context context) {
             super(context);
@@ -108,6 +105,23 @@ public class SimpleGameEngine extends Activity {
 
         public void update() {
             paddle.update(fps);
+
+            if(ball.getRect().left < 0 || ball.getRect().right > screenX){
+                ball.reverseXVelocity();
+            }
+
+            if (ball.getRect().top < 0) {
+                ball.reverseYVelocity();
+            }
+
+            if (RectF.intersects(paddle.getRect(), ball.getRect())){
+                ball.reverseYVelocity();
+            }
+
+            if(ball.getRect().bottom > screenY){
+                ball.reset(screenX, screenY);
+            }
+
             ball.update(fps);
 
         }
