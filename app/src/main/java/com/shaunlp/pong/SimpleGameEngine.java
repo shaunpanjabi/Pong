@@ -38,6 +38,7 @@ public class SimpleGameEngine extends Activity {
 
 
         Paddle paddle;
+        Paddle paddle2;
         Ball ball;
 
         public GameView(Context context) {
@@ -54,6 +55,7 @@ public class SimpleGameEngine extends Activity {
             screenY = size.y;
 
             paddle = new Paddle(screenX, screenY);
+            paddle2 = new Paddle(screenX, 20);
             ball = new Ball(screenX, screenY);
 
             restart();
@@ -89,15 +91,22 @@ public class SimpleGameEngine extends Activity {
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
                     paused = false;
-                    if (motionEvent.getX() > screenX / 2) {
-                        paddle.setMovementState(paddle.RIGHT);
+                    Paddle piddler;
+                    if (motionEvent.getY() > screenY / 2 ) {
+                        piddler = paddle;
                     } else {
-                        paddle.setMovementState(paddle.LEFT);
+                        piddler = paddle2;
+                    }
+                    if (motionEvent.getX() > screenX / 2) {
+                        piddler.setMovementState(piddler.RIGHT);
+                    } else {
+                        piddler.setMovementState(piddler.LEFT);
                     }
                     break;
 
                 case MotionEvent.ACTION_UP:
                     paddle.setMovementState(paddle.STOPPED);
+                    paddle2.setMovementState(paddle.STOPPED);
                     break;
             }
             return true;
@@ -105,6 +114,7 @@ public class SimpleGameEngine extends Activity {
 
         public void update() {
             paddle.update(fps);
+            paddle2.update(fps);
 
             if(ball.getRect().left < 0 || ball.getRect().right > screenX){
                 ball.reverseXVelocity();
@@ -114,11 +124,11 @@ public class SimpleGameEngine extends Activity {
                 ball.reverseYVelocity();
             }
 
-            if (RectF.intersects(paddle.getRect(), ball.getRect())){
+            if (RectF.intersects(paddle.getRect(), ball.getRect()) || RectF.intersects(paddle2.getRect(), ball.getRect())){
                 ball.reverseYVelocity();
             }
 
-            if(ball.getRect().bottom > screenY){
+            if(ball.getRect().bottom > screenY || ball.getRect().top < 0){
                 ball.reset(screenX, screenY);
             }
 
@@ -136,6 +146,7 @@ public class SimpleGameEngine extends Activity {
 
                 // draw paddle
                 canvas.drawRect(paddle.getRect(), paint);
+                canvas.drawRect(paddle2.getRect(), paint);
                 canvas.drawRect(ball.getRect(), paint);
 
                 paint.setTextSize(45);
