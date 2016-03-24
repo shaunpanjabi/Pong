@@ -36,6 +36,8 @@ public class SimpleGameEngine extends Activity {
         int screenX;
         int screenY;
 
+        int p1_score;
+        int p2_score;
 
         Paddle paddle;
         Paddle paddle2;
@@ -57,6 +59,9 @@ public class SimpleGameEngine extends Activity {
             paddle = new Paddle(screenX, screenY);
             paddle2 = new Paddle(screenX, 20);
             ball = new Ball(screenX, screenY);
+
+            p1_score = 0;
+            p2_score = 0;
 
             restart();
 
@@ -98,6 +103,7 @@ public class SimpleGameEngine extends Activity {
                         piddler = paddle2;
                     }
                     if (motionEvent.getX() > screenX / 2) {
+//                        if (piddler.getRect().right >
                         piddler.setMovementState(piddler.RIGHT);
                     } else {
                         piddler.setMovementState(piddler.LEFT);
@@ -128,7 +134,12 @@ public class SimpleGameEngine extends Activity {
                 ball.reverseYVelocity();
             }
 
-            if(ball.getRect().bottom > screenY || ball.getRect().top < 0){
+            if(ball.getRect().bottom > screenY){
+                p1_score += 1;
+                ball.reset(screenX, screenY);
+            }
+            if(ball.getRect().top < 0){
+                p2_score += 1;
                 ball.reset(screenX, screenY);
             }
 
@@ -149,9 +160,18 @@ public class SimpleGameEngine extends Activity {
                 canvas.drawRect(paddle2.getRect(), paint);
                 canvas.drawRect(ball.getRect(), paint);
 
+                canvas.drawRect(0, screenY/2 - 10, screenX, screenY/2 + 10, paint);
+                canvas.drawCircle(screenX / 2, screenY / 2, 150, paint);
+                paint.setColor(Color.argb(255, 0, 0, 0));
+                canvas.drawCircle(screenX / 2, screenY / 2, 130, paint);
+                paint.setColor(Color.argb(255, 255, 255, 255));
+
                 paint.setTextSize(45);
 
                 canvas.drawText("FPS:" + fps, 20, 40, paint);
+                paint.setTextSize(100);
+                canvas.drawText(Integer.toString(p1_score), 0, screenY/2-30, paint);
+                canvas.drawText(Integer.toString(p2_score), 0, screenY/2+100, paint);
 
                 ourHolder.unlockCanvasAndPost(canvas);
             }

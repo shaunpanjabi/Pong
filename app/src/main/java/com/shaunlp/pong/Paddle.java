@@ -44,6 +44,8 @@ public class Paddle {
         paddleMoving = state;
     }
 
+    public void setPaddleSpeed(int speed) {paddleSpeed = speed; }
+
     public void update(long fps){
         if(paddleMoving == LEFT) {
             x = x - paddleSpeed / fps;
