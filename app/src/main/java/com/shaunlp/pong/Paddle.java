@@ -22,12 +22,16 @@ public class Paddle {
 
     private int paddleMoving = STOPPED;
 
+    private int screenyX;
+
     public Paddle(int screenX, int screenY) {
         length = 130;
         height = 20;
 
         x = screenX / 2;
         y = screenY - 20;
+
+        screenyX = screenX;
 
         rect = new RectF(x, y, x + length, y + height);
 
@@ -48,11 +52,15 @@ public class Paddle {
 
     public void update(long fps){
         if(paddleMoving == LEFT) {
-            x = x - paddleSpeed / fps;
+            if (x >= 0 ) {
+                x = x - paddleSpeed / fps;
+            }
         }
 
         if(paddleMoving == RIGHT){
-            x = x + paddleSpeed / fps;
+            if (x + length <= screenyX) {
+                x = x + paddleSpeed / fps;
+            }
         }
 
         rect.left = x;

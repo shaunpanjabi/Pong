@@ -102,8 +102,7 @@ public class SimpleGameEngine extends Activity {
                     } else {
                         piddler = paddle2;
                     }
-                    if (motionEvent.getX() > screenX / 2) {
-//                        if (piddler.getRect().right >
+                    if (motionEvent.getX() > piddler.getRect().centerX()) {
                         piddler.setMovementState(piddler.RIGHT);
                     } else {
                         piddler.setMovementState(piddler.LEFT);
