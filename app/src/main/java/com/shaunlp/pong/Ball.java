@@ -8,12 +8,12 @@ public class Ball {
     RectF rect;
     float xVelocity;
     float yVelocity;
-    float ballWidth = 10;
-    float ballHeight = 10;
+    float ballWidth = 30;
+    float ballHeight = 30;
 
     public Ball(int screenX, int screenY) {
-        xVelocity = 200;
-        yVelocity = -400;
+        xVelocity = 500;
+        yVelocity = 1000;
 
         rect = new RectF();
     }
@@ -21,6 +21,8 @@ public class Ball {
     public RectF getRect(){
         return rect;
     }
+
+    public float getBallWidth() {return ballWidth;}
 
     public void update(long fps){
         rect.left = rect.left + (xVelocity / fps);
@@ -31,6 +33,14 @@ public class Ball {
 
     public void reverseYVelocity() {
         yVelocity = -yVelocity;
+    }
+
+    public void setNegativeVelocity() {
+        yVelocity = -1 * Math.abs(yVelocity);
+    }
+
+    public void setPositiveVelocity() {
+        yVelocity = Math.abs(yVelocity);
     }
 
     public void reverseXVelocity() {

@@ -2,9 +2,6 @@ package com.shaunlp.pong;
 
 import android.graphics.RectF;
 
-/**
- * Created by shaunpanjabi on 3/19/16.
- */
 public class Paddle {
     private RectF rect;
 
@@ -24,24 +21,28 @@ public class Paddle {
 
     private int screenyX;
 
-    public Paddle(int screenX, int screenY) {
-        length = 130;
-        height = 20;
+    public Paddle(int screenX, int screenY, int start_x, int start_y) {
+        length = screenX * (float) 0.15;
+        height = 30;
 
-        x = screenX / 2;
-        y = screenY - 20;
+        x = start_x;
+        y = start_y;
 
         screenyX = screenX;
 
-        rect = new RectF(x, y, x + length, y + height);
+        rect = new RectF(start_x, start_y, start_x + length, start_y + height);
 
 
-        paddleSpeed = 350;
+        paddleSpeed = 700;
 
     }
 
     public RectF getRect() {
             return rect;
+    }
+
+    public float getHeight() {
+        return height;
     }
 
     public void setMovementState(int state) {
