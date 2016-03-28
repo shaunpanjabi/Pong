@@ -35,17 +35,29 @@ public class Ball {
         yVelocity = -yVelocity;
     }
 
-    public void setNegativeVelocity() {
+    public void setNegativeYVelocity() {
         yVelocity = -1 * Math.abs(yVelocity);
     }
 
-    public void setPositiveVelocity() {
+    public void setPositiveYVelocity() {
         yVelocity = Math.abs(yVelocity);
+    }
+
+    public void setNegativeXVelocity() {
+        xVelocity = -1 * Math.abs(xVelocity);
+    }
+
+    public void setPositiveXVelocity() {
+        xVelocity = Math.abs(xVelocity);
     }
 
     public void reverseXVelocity() {
         xVelocity = -xVelocity;
     }
+
+    public void setxVelocity(float velocity) {xVelocity = velocity;}
+
+    public void setyVelocity(float velocity) {yVelocity = velocity;}
 
     public void setRandomXVelocity() {
         Random generator = new Random();
@@ -67,9 +79,9 @@ public class Ball {
     }
 
     public void reset(int x, int y){
-        rect.left = x / 2;
-        rect.top = y /2;
-        rect.right = x / 2 + ballWidth;
-        rect.bottom = y / 2 - ballHeight;
+        rect.left = x / 2 - ballWidth / 2;
+        rect.top = y / 2 + ballHeight / 2;
+        rect.right = rect.left + ballWidth;
+        rect.bottom = rect.top - ballHeight;
     }
 }

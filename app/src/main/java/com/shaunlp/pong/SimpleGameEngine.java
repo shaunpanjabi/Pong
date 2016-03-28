@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -96,8 +95,6 @@ public class SimpleGameEngine extends Activity {
                 if (timeThisFrame >= 1) {
                     fps = 1000 / timeThisFrame;
                 }
-
-
             }
         }
 
@@ -157,7 +154,7 @@ public class SimpleGameEngine extends Activity {
                     if (hapticFeedback) {
                         vibez.vibrate(10);
                     }
-                    ball.setNegativeVelocity();
+                    ball.setNegativeYVelocity();
                     ball.clearObstacleY(paddle.getRect().top);
                 } else {
                     p1_score += 1;
@@ -174,7 +171,7 @@ public class SimpleGameEngine extends Activity {
                     if (hapticFeedback) {
                         vibez.vibrate(10);
                     }
-                    ball.setPositiveVelocity();
+                    ball.setPositiveYVelocity();
                     ball.clearObstacleY(paddle2.getRect().bottom + paddle2.getHeight());
 
                 } else {
