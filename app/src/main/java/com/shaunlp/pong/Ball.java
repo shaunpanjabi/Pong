@@ -68,6 +68,15 @@ public class Ball {
         }
     }
 
+    public void setRandomVelocity() {
+        Random generator = new Random();
+        int xVel = generator.nextInt(5000);
+        int yVel = generator.nextInt(5000);
+        xVelocity = xVel;
+        yVelocity = yVel;
+
+    }
+
     public void clearObstacleY(float y){
         rect.bottom = y;
         rect.top = y - ballHeight;

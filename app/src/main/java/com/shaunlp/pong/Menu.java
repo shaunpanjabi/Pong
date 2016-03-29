@@ -20,6 +20,9 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Menu extends Activity {
 
     MenuView menuView;
@@ -43,6 +46,7 @@ public class Menu extends Activity {
         int screenY;
 
         Ball ball;
+        ArrayList<Ball> ballBuff;
 
         int touchCount;
 
@@ -60,19 +64,20 @@ public class Menu extends Activity {
             screenX = size.x;
             screenY = size.y;
 
-            ball = new Ball(screenX, screenY);
-            ball.setxVelocity(5000);
-            ball.setyVelocity(0);
-            restart();
+            ballBuff = new ArrayList<>();
 
+            for (int i=0; i <= 9; i++ ) {
+                ballBuff.add(new Ball(screenX, screenY));
+                ballBuff.get(i).setRandomVelocity();
+            }
+
+            restart();
         }
 
         @Override
         public void run() {
             while (playing) {
                 long startFrameTime = System.currentTimeMillis();
-//                Log.e("HEY", Float.toString(fps));
-//                Log.e("HEY", ball.getRect().toString());
                 if (!paused){
                     update();
                 }
@@ -88,32 +93,28 @@ public class Menu extends Activity {
 
         public void update() {
 
-            ball.update(fps);
-//            Log.e("BALL: ", Float.toString(fps));
+            for (int i=0; i < ballBuff.size(); i++) {
+                ballBuff.get(i).update(fps);
 
+                if(ballBuff.get(i).getRect().left < 0){
+                    ballBuff.get(i).reverseXVelocity();
+                    ballBuff.get(i).clearObstacleX(ballBuff.get(i).getRect().width());
+                }
 
-            if(ball.getRect().left < 0){
-                Log.e("Action: ", "Left Wall collision");
-                ball.reverseXVelocity();
-                ball.clearObstacleX(ball.getRect().width());
-            }
+                if(ballBuff.get(i).getRect().right > screenX){
+                    ballBuff.get(i).reverseXVelocity();
+                    ballBuff.get(i).clearObstacleX(screenX - ballBuff.get(i).getRect().width());
+                }
 
-            if(ball.getRect().right > screenX){
-                Log.e("Action: ", "Right Wall collision");
-                ball.reverseXVelocity();
-                ball.clearObstacleX(screenX - ball.getRect().width());
-            }
+                if(ballBuff.get(i).getRect().top < 0){
+                    ballBuff.get(i).setPositiveYVelocity();
+//                ball.clearObstacleY(1 + ball.getRect().height());
+                }
 
-            if(ball.getRect().top < 0){
-                Log.e("Action: ", "Top Wall collision");
-                ball.reverseYVelocity();
-                ball.clearObstacleY(ball.getRect().height());
-            }
-
-            if(ball.getRect().bottom > screenY){
-                Log.e("Action: ", "Bottom Wall collision");
-                ball.reverseYVelocity();
-                ball.clearObstacleY(ball.getRect().height());
+                if(ballBuff.get(i).getRect().bottom > screenY){
+                    ballBuff.get(i).reverseYVelocity();
+//                ball.clearObstacleY(ball.getRect().height());
+                }
             }
 
         }
@@ -138,11 +139,13 @@ public class Menu extends Activity {
             if (ourHolder.getSurface().isValid()){
                 canvas = ourHolder.lockCanvas();
 
-                canvas.drawColor(Color.argb(255, 255, 0, 0));
+                canvas.drawColor(Color.argb(255, 0, 0, 0));
 
                 paint.setColor(Color.argb(255, 255, 255, 255));
 
-                canvas.drawRect(ball.getRect(), paint);
+                for (int i=0; i < ballBuff.size(); i++) {
+                    canvas.drawRect(ballBuff.get(i).getRect(), paint);
+                }
 
                 canvas.drawText("FPS:" + fps, 20, 40, paint);
 
@@ -153,7 +156,9 @@ public class Menu extends Activity {
         }
 
         public void restart() {
-            ball.reset(screenX, screenY);
+            for (int i=0; i < ballBuff.size(); i++) {
+            ballBuff.get(i).reset(screenX, screenY);
+            }
         }
 
         public void pause() {
