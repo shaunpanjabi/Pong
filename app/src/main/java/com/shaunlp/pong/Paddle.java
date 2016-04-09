@@ -33,7 +33,7 @@ public class Paddle {
         rect = new RectF(start_x, start_y, start_x + length, start_y + height);
 
 
-        paddleSpeed = 700;
+        paddleSpeed = 1200;
 
     }
 

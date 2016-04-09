@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Menu extends Activity {
 
@@ -34,7 +36,8 @@ public class Menu extends Activity {
         Thread gameThread = null;
         private long timeThisFrame;
         volatile boolean playing;
-        boolean paused = true;
+        boolean paused;
+        long fpsWait;
         long fps;
 
         SurfaceHolder ourHolder;
@@ -48,10 +51,14 @@ public class Menu extends Activity {
         Ball ball;
         ArrayList<Ball> ballBuff;
 
-        int touchCount;
+        int touchCount=0;
+
+        Random generator = new Random();
 
         public MenuView(Context context) {
             super(context);
+            fpsWait = 0;
+            paused = true;
 
             ourHolder = getHolder();
             paint = new Paint();
@@ -66,7 +73,7 @@ public class Menu extends Activity {
 
             ballBuff = new ArrayList<>();
 
-            for (int i=0; i <= 9; i++ ) {
+            for (int i=0; i <= 30; i++ ) {
                 ballBuff.add(new Ball(screenX, screenY));
                 ballBuff.get(i).setRandomVelocity();
             }
@@ -78,7 +85,18 @@ public class Menu extends Activity {
         public void run() {
             while (playing) {
                 long startFrameTime = System.currentTimeMillis();
-                if (!paused){
+
+                if (paused) {
+                    if (fpsWait < 100){
+                        fpsWait += 1;
+                        Log.e("Error:", "wait..");
+
+                    } else {
+                        paused = false;
+                        Log.e("Error:", "paused..");
+
+                    }
+                } else {
                     update();
                 }
 
@@ -124,7 +142,7 @@ public class Menu extends Activity {
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     paused = false;
-                    if (touchCount >= 2) {
+                    if (touchCount >= 1) {
                         Intent gameIntent = new Intent(Menu.this, SimpleGameEngine.class);
                         Menu.this.startActivity(gameIntent);
                     } else {
@@ -144,6 +162,10 @@ public class Menu extends Activity {
                 paint.setColor(Color.argb(255, 255, 255, 255));
 
                 for (int i=0; i < ballBuff.size(); i++) {
+                    int red = generator.nextInt(255);
+                    int green = generator.nextInt(255);
+                    int blue = generator.nextInt(255);
+                    paint.setColor(Color.argb(255, red, green, blue));
                     canvas.drawRect(ballBuff.get(i).getRect(), paint);
                 }
 
@@ -183,6 +205,8 @@ public class Menu extends Activity {
         menuView = new MenuView(this);
         FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.addView(menuView);
+        Log.e("meh", Integer.toString(frameLayout.getHeight()));
+        Log.e("meh", Integer.toString(frameLayout.getWidth()));
 
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -195,13 +219,16 @@ public class Menu extends Activity {
 
 //        TextView textview1 = (TextView) findViewById(R.id.texty);
         TextView dynamicTextView = new TextView(this);
+        ViewGroup.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         dynamicTextView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        dynamicTextView.setGravity(Gravity.LEFT);
 
-        dynamicTextView.setText(" PONG ");
+        dynamicTextView.setText("PONG");
         dynamicTextView.setTextSize(100);
-        dynamicTextView.setX(screenX / 2 - 500);
-        dynamicTextView.setY(screenY / 2 - 500);
-        dynamicTextView.setTypeface(Typeface.SERIF);
+//        dynamicTextView.setGravity(Gravity.CENTER);
+//        dynamicTextView.setX(screenX / 2 - 500);
+//        dynamicTextView.setY(screenY / 2 - 500);
+        dynamicTextView.setTypeface(Typeface.SANS_SERIF);
 
         relativeLayout.addView(frameLayout);
         relativeLayout.addView(dynamicTextView);

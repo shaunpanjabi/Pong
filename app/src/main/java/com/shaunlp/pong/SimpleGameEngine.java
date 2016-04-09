@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -14,7 +15,11 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.os.Vibrator;
 
+import java.util.Random;
+
 // TODO: Add multitouch support
+// TODO: fix edge paddle collision
+// TODO: Add A.I
 
 public class SimpleGameEngine extends Activity {
     GameView gameView;
@@ -28,26 +33,30 @@ public class SimpleGameEngine extends Activity {
         volatile boolean playing;
 
         boolean paused = true;
-        boolean hapticFeedback = true;
 
         Canvas canvas;
         Paint paint;
 
+        Random generator;
+
         long fps;
-
         private long timeThisFrame;
-
         int screenX;
+
         int screenY;
-
         int p1_score;
-        int p2_score;
 
+        int p2_score;
         Paddle paddle;
         Paddle paddle2;
+
         Ball ball;
 
         double paddingY;
+
+        // Settings
+        boolean rainbowBall = true;
+        boolean hapticFeedback = true;
 
         public GameView(Context context) {
             super(context);
@@ -71,6 +80,8 @@ public class SimpleGameEngine extends Activity {
 
             p1_score = 0;
             p2_score = 0;
+
+            generator = new Random();
 
             restart();
 
@@ -134,7 +145,7 @@ public class SimpleGameEngine extends Activity {
                 ball.clearObstacleX(ball.getRect().width());
 
                 if (hapticFeedback) {
-                    vibez.vibrate(10);
+                    vibez.vibrate(C.Vibrate.VIBRATE_LOW);
                 }
             }
 
@@ -143,41 +154,43 @@ public class SimpleGameEngine extends Activity {
                 ball.reverseXVelocity();
                 ball.clearObstacleX(screenX - ball.getRect().width());
                 if (hapticFeedback) {
-                    vibez.vibrate(10);
+                    vibez.vibrate(C.Vibrate.VIBRATE_LOW);
                 }
             }
 
-            if(ball.getRect().bottom > paddle.getRect().top){
-                Log.e("Action: ", "In here 1");
-                if(ball.getRect().centerX() <= paddle.getRect().right && ball.getRect().centerX() >= paddle.getRect().left) {
+            if(ball.getRect().bottom >= paddle.getRect().top){
+//                if(ball.getRect().left <= paddle.getRect().right && ball.getRect().centerX() >= paddle.getRect().left) {
+                if(ball.getRect().right >= paddle.getRect().left && ball.getRect().left <= paddle.getRect().right) {
                     Log.e("Action: ", "Collision detected 3");
                     if (hapticFeedback) {
-                        vibez.vibrate(10);
+                        vibez.vibrate(C.Vibrate.VIBRATE_LOW);
                     }
                     ball.setNegativeYVelocity();
                     ball.clearObstacleY(paddle.getRect().top);
+                    ball.speedUpYVelocity((float) 0.1);
                 } else {
                     p1_score += 1;
                     if (hapticFeedback) {
-                        vibez.vibrate(10);
+                        vibez.vibrate(C.Vibrate.VIBRATE_LOW);
                     }
                     ball.reset(screenX, screenY);
                 }
             }
 
             if(ball.getRect().top <= paddle2.getRect().bottom){
-                if(ball.getRect().centerX() <= paddle2.getRect().right && ball.getRect().centerX() >= paddle2.getRect().left) {
+                if(ball.getRect().right >= paddle2.getRect().left && ball.getRect().left <= paddle2.getRect().right) {
                     Log.e("Action: ", "Collision detected 4");
                     if (hapticFeedback) {
-                        vibez.vibrate(10);
+                        vibez.vibrate(C.Vibrate.VIBRATE_LOW);
                     }
                     ball.setPositiveYVelocity();
                     ball.clearObstacleY(paddle2.getRect().bottom + paddle2.getHeight());
+                    ball.speedUpYVelocity((float) 0.1);
 
                 } else {
                     p2_score += 1;
                     if (hapticFeedback) {
-                        vibez.vibrate(10);
+                        vibez.vibrate(C.Vibrate.VIBRATE_LOW);
                     }
                     ball.reset(screenX, screenY);
                 }
@@ -206,14 +219,23 @@ public class SimpleGameEngine extends Activity {
                 canvas.drawCircle(screenX / 2, screenY / 2, 130, paint);
                 paint.setColor(Color.argb(255, 255, 255, 255));
 
+                if (rainbowBall) {
+                    paint.setColor(Color.argb(255, generator.nextInt(255), generator.nextInt(255), generator.nextInt(255)));
+                }
                 canvas.drawRect(ball.getRect(), paint);
+
+                paint.setColor(Color.argb(255, 0, 0, 0));
+                canvas.drawRect(new RectF(paddle2.getRect().left, 0, paddle2.getRect().right, paddle2.getRect().top), paint);
+                canvas.drawRect(new RectF(paddle.getRect().left, paddle.getRect().bottom, paddle.getRect().right, screenY), paint);
+
+                paint.setColor(Color.argb(255, 0, 255, 0));
 
                 paint.setTextSize(45);
 
                 canvas.drawText("FPS:" + fps, 20, 40, paint);
                 paint.setTextSize(100);
-                canvas.drawText(Integer.toString(p1_score), 0, screenY/2-30, paint);
-                canvas.drawText(Integer.toString(p2_score), 0, screenY/2+100, paint);
+                canvas.drawText(Integer.toString(p1_score), 0, screenY / 2 - 30, paint);
+                canvas.drawText(Integer.toString(p2_score), 0, screenY / 2 + 100, paint);
 
                 ourHolder.unlockCanvasAndPost(canvas);
             }

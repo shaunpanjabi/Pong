@@ -39,6 +39,10 @@ public class Ball {
         yVelocity = -1 * Math.abs(yVelocity);
     }
 
+    public void speedUpYVelocity(float percentage) {
+        yVelocity = yVelocity + (yVelocity*percentage);
+    }
+
     public void setPositiveYVelocity() {
         yVelocity = Math.abs(yVelocity);
     }
