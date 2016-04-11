@@ -7,7 +7,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
@@ -15,21 +17,25 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.ViewGroup;
+import android.view.SurfaceView;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
+
+// TODO: Fix soundpool lag
+// TODO: Add start button
+// TODO: Tap, skips intro
 
 public class Menu extends Activity {
 
     MenuView menuView;
-    int screenX;
-    int screenY;
+    SoundPool sp;
 
     public class MenuView extends SurfaceView implements Runnable {
 
@@ -37,8 +43,7 @@ public class Menu extends Activity {
         private long timeThisFrame;
         volatile boolean playing;
         boolean paused;
-        long fpsWait;
-        long fps;
+        long fps=60;
 
         SurfaceHolder ourHolder;
 
@@ -48,17 +53,17 @@ public class Menu extends Activity {
         int screenX;
         int screenY;
 
-        Ball ball;
         ArrayList<Ball> ballBuff;
 
-        int touchCount=0;
+        float panCount;
 
         Random generator = new Random();
 
+        Rect textContainer;
+
         public MenuView(Context context) {
             super(context);
-            fpsWait = 0;
-            paused = true;
+            paused = false;
 
             ourHolder = getHolder();
             paint = new Paint();
@@ -70,6 +75,8 @@ public class Menu extends Activity {
 
             screenX = size.x;
             screenY = size.y;
+
+            panCount = screenY;
 
             ballBuff = new ArrayList<>();
 
@@ -85,23 +92,10 @@ public class Menu extends Activity {
         public void run() {
             while (playing) {
                 long startFrameTime = System.currentTimeMillis();
-
-                if (paused) {
-                    if (fpsWait < 100){
-                        fpsWait += 1;
-                        Log.e("Error:", "wait..");
-
-                    } else {
-                        paused = false;
-                        Log.e("Error:", "paused..");
-
-                    }
-                } else {
+                if (!paused) {
                     update();
+                    draw();
                 }
-
-                draw();
-
                 timeThisFrame = System.currentTimeMillis() - startFrameTime;
                 if (timeThisFrame >= 1) {
                     fps = 1000 / timeThisFrame;
@@ -139,16 +133,31 @@ public class Menu extends Activity {
 
         @Override
         public boolean onTouchEvent(MotionEvent motionEvent) {
+            int touchX = (int) motionEvent.getX();
+            int touchY = (int) motionEvent.getY();
+
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    paused = false;
-                    if (touchCount >= 1) {
-                        Intent gameIntent = new Intent(Menu.this, SimpleGameEngine.class);
-                        Menu.this.startActivity(gameIntent);
-                    } else {
-                        touchCount += 1;
+                    panCount = 499;
+
+                    for (int i=0; i < ballBuff.size(); i++) {
+                        ballBuff.get(i).update(fps);
+                        ballBuff.get(i).setxVelocity(0);
+                        ballBuff.get(i).setyVelocity(1000);
                     }
 
+                    if (textContainer.contains(touchX, touchY)) {
+                        Intent gameIntent = new Intent(Menu.this, SimpleGameEngine.class);
+                        Menu.this.startActivity(gameIntent);
+                    }
+
+//                    if (!paused) {
+//                        paused = true;
+//                        Intent gameIntent = new Intent(Menu.this, SimpleGameEngine.class);
+//                        Menu.this.startActivity(gameIntent);
+//                    } else {
+//                        paused = false;
+//                    }
             }
             return true;
         }
@@ -169,7 +178,35 @@ public class Menu extends Activity {
                     canvas.drawRect(ballBuff.get(i).getRect(), paint);
                 }
 
-                canvas.drawText("FPS:" + fps, 20, 40, paint);
+//                canvas.drawText("FPS:" + fps, 20, 40, paint);
+                paint.setTextSize(150);
+
+                Rect bounds =  new Rect();
+                paint.getTextBounds("START", 0, "START".length(), bounds);
+                float mTextWidth = paint.measureText("START");
+                float mTextHeight = bounds.height();
+                textContainer = new Rect(
+                        (int) ((screenX/2)-(mTextWidth/2)),
+                        (int) ((screenY*(float) 0.8)-(mTextHeight)),
+                        (int) ((screenX/2)+(mTextWidth/2)),
+                        (int) ((screenY*0.8)));
+
+
+                paint.setTextAlign(Paint.Align.CENTER);
+                if (panCount > 500.0) {
+                    panCount -= 5;
+                } else {
+                    canvas.drawRect(textContainer, paint);
+                    paint.setColor(Color.argb(255, 0, 255, 0));
+                    canvas.drawText("START", screenX / 2, screenY * (float) 0.80, paint);
+                }
+                paint.setTextSize(500);
+                canvas.drawText("PONG", screenX/2, panCount, paint);
+                int red = generator.nextInt(255);
+                int green = generator.nextInt(255);
+                int blue = generator.nextInt(255);
+                paint.setColor(Color.argb(255, red, green, blue));
+                canvas.drawText("PONG", screenX/2 + 10, panCount + 10, paint);
 
                 ourHolder.unlockCanvasAndPost(canvas);
 
@@ -203,37 +240,9 @@ public class Menu extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         menuView = new MenuView(this);
-        FrameLayout frameLayout = new FrameLayout(this);
-        frameLayout.addView(menuView);
-        Log.e("meh", Integer.toString(frameLayout.getHeight()));
-        Log.e("meh", Integer.toString(frameLayout.getWidth()));
-
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-
-        screenX = size.x;
-        screenY = size.y;
-
-        RelativeLayout relativeLayout= new RelativeLayout(this);
-
-//        TextView textview1 = (TextView) findViewById(R.id.texty);
-        TextView dynamicTextView = new TextView(this);
-        ViewGroup.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        dynamicTextView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        dynamicTextView.setGravity(Gravity.LEFT);
-
-        dynamicTextView.setText("PONG");
-        dynamicTextView.setTextSize(100);
-//        dynamicTextView.setGravity(Gravity.CENTER);
-//        dynamicTextView.setX(screenX / 2 - 500);
-//        dynamicTextView.setY(screenY / 2 - 500);
-        dynamicTextView.setTypeface(Typeface.SANS_SERIF);
-
-        relativeLayout.addView(frameLayout);
-        relativeLayout.addView(dynamicTextView);
-
-        setContentView(relativeLayout);
+        setContentView(menuView);
+        sp = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+//        sp.setOnLoadCompleteListener();
     }
 
     @Override
