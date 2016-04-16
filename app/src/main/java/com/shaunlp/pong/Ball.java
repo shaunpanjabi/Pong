@@ -96,5 +96,7 @@ public class Ball {
         rect.top = y / 2 + ballHeight / 2;
         rect.right = rect.left + ballWidth;
         rect.bottom = rect.top - ballHeight;
+        setxVelocity(500);
+        setyVelocity(1000);
     }
 }

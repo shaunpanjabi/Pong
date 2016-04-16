@@ -8,20 +8,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.ViewGroup;
 import android.view.SurfaceView;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 
@@ -29,21 +23,20 @@ import java.util.ArrayList;
 import java.util.Random;
 
 // TODO: Fix soundpool lag
-// TODO: Add start button
-// TODO: Tap, skips intro
 
 public class Menu extends Activity {
 
-    MenuView menuView;
     SoundPool sp;
+    MenuView menuView;
 
     public class MenuView extends SurfaceView implements Runnable {
 
         Thread gameThread = null;
         private long timeThisFrame;
-        volatile boolean playing;
+        long fps = 60;
+
         boolean paused;
-        long fps=60;
+        volatile boolean playing;
 
         SurfaceHolder ourHolder;
 
@@ -57,9 +50,10 @@ public class Menu extends Activity {
 
         float panCount;
 
-        Random generator = new Random();
-
         Rect textContainer;
+
+        String PONG_TITLE_TEXT = getString(R.string.menu_title);
+        String PONG_START_TEXT = getString(R.string.menu_start);
 
         public MenuView(Context context) {
             super(context);
@@ -81,8 +75,10 @@ public class Menu extends Activity {
             ballBuff = new ArrayList<>();
 
             for (int i=0; i <= 30; i++ ) {
-                ballBuff.add(new Ball(screenX, screenY));
-                ballBuff.get(i).setRandomVelocity();
+                ballBuff.add(new Ball((int) (2 * screenX * (((float) i) / 30.0)), screenY));
+                ballBuff.get(i).setxVelocity(0);
+                ballBuff.get(i).setyVelocity(500);
+//                ballBuff.get(i).setRandomVelocity();
             }
 
             restart();
@@ -140,24 +136,16 @@ public class Menu extends Activity {
                 case MotionEvent.ACTION_DOWN:
                     panCount = 499;
 
-                    for (int i=0; i < ballBuff.size(); i++) {
-                        ballBuff.get(i).update(fps);
-                        ballBuff.get(i).setxVelocity(0);
-                        ballBuff.get(i).setyVelocity(1000);
-                    }
+//                    for (int i=0; i < ballBuff.size(); i++) {
+//                        ballBuff.get(i).update(fps);
+//                        ballBuff.get(i).setxVelocity(0);
+//                    ballBuff.get(i).setyVelocity(1000);
+//                    }
 
                     if (textContainer.contains(touchX, touchY)) {
                         Intent gameIntent = new Intent(Menu.this, SimpleGameEngine.class);
                         Menu.this.startActivity(gameIntent);
                     }
-
-//                    if (!paused) {
-//                        paused = true;
-//                        Intent gameIntent = new Intent(Menu.this, SimpleGameEngine.class);
-//                        Menu.this.startActivity(gameIntent);
-//                    } else {
-//                        paused = false;
-//                    }
             }
             return true;
         }
@@ -166,24 +154,21 @@ public class Menu extends Activity {
             if (ourHolder.getSurface().isValid()){
                 canvas = ourHolder.lockCanvas();
 
+                // Bottom layer == black
                 canvas.drawColor(Color.argb(255, 0, 0, 0));
 
                 paint.setColor(Color.argb(255, 255, 255, 255));
 
                 for (int i=0; i < ballBuff.size(); i++) {
-                    int red = generator.nextInt(255);
-                    int green = generator.nextInt(255);
-                    int blue = generator.nextInt(255);
-                    paint.setColor(Color.argb(255, red, green, blue));
+                    paint.setColor(Colors.getRandomColor());
                     canvas.drawRect(ballBuff.get(i).getRect(), paint);
                 }
 
-//                canvas.drawText("FPS:" + fps, 20, 40, paint);
-                paint.setTextSize(150);
+                paint.setTextSize(250);
 
                 Rect bounds =  new Rect();
-                paint.getTextBounds("START", 0, "START".length(), bounds);
-                float mTextWidth = paint.measureText("START");
+                paint.getTextBounds(PONG_START_TEXT, 0, PONG_START_TEXT.length(), bounds);
+                float mTextWidth = paint.measureText(PONG_START_TEXT);
                 float mTextHeight = bounds.height();
                 textContainer = new Rect(
                         (int) ((screenX/2)-(mTextWidth/2)),
@@ -198,25 +183,22 @@ public class Menu extends Activity {
                 } else {
                     canvas.drawRect(textContainer, paint);
                     paint.setColor(Color.argb(255, 0, 255, 0));
-                    canvas.drawText("START", screenX / 2, screenY * (float) 0.80, paint);
+                    canvas.drawText(PONG_START_TEXT, screenX / 2, screenY * (float) 0.80, paint);
                 }
-                paint.setTextSize(500);
-                canvas.drawText("PONG", screenX/2, panCount, paint);
-                int red = generator.nextInt(255);
-                int green = generator.nextInt(255);
-                int blue = generator.nextInt(255);
-                paint.setColor(Color.argb(255, red, green, blue));
-                canvas.drawText("PONG", screenX/2 + 10, panCount + 10, paint);
-
+                paint.setTextSize(screenX / 4);
+                canvas.drawText(PONG_TITLE_TEXT, screenX/2, panCount, paint);
+                paint.setColor(Colors.getRandomColor());
+                canvas.drawText(PONG_TITLE_TEXT, screenX/2 + 10, panCount + 10, paint);
                 ourHolder.unlockCanvasAndPost(canvas);
-
             }
-
         }
 
         public void restart() {
             for (int i=0; i < ballBuff.size(); i++) {
-            ballBuff.get(i).reset(screenX, screenY);
+                int xPos = (int) (2*screenX*((float) i/30.0));
+                int yPos = (int) ((double) screenY/200 * Math.sin((double) xPos));
+                ballBuff.get(i).reset(xPos, yPos);
+                ballBuff.get(i).setRandomVelocity();
             }
         }
 
@@ -249,7 +231,6 @@ public class Menu extends Activity {
     protected void onResume() {
         super.onResume();
         menuView.resume();
-
     }
 
     @Override

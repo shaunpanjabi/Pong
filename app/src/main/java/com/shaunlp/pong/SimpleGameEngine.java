@@ -26,8 +26,7 @@ public class SimpleGameEngine extends Activity {
     Vibrator vibez;
 
     public class GameView extends SurfaceView implements Runnable {
-        Thread gameThread = null;
-
+        private Thread gameThread = null;
         SurfaceHolder ourHolder;
 
         volatile boolean playing;
@@ -36,8 +35,6 @@ public class SimpleGameEngine extends Activity {
 
         Canvas canvas;
         Paint paint;
-
-        Random generator;
 
         long fps;
         private long timeThisFrame;
@@ -55,12 +52,12 @@ public class SimpleGameEngine extends Activity {
         double paddingY;
 
         // Settings
-        boolean rainbowBall = true;
+        boolean debug = true;
+        boolean rainbowBall = false;
         boolean hapticFeedback = true;
 
         public GameView(Context context) {
             super(context);
-
             ourHolder = getHolder();
             paint = new Paint();
             paint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -80,8 +77,6 @@ public class SimpleGameEngine extends Activity {
 
             p1_score = 0;
             p2_score = 0;
-
-            generator = new Random();
 
             restart();
 
@@ -189,6 +184,7 @@ public class SimpleGameEngine extends Activity {
 
                 } else {
                     p2_score += 1;
+                    p2_score += 1;
                     if (hapticFeedback) {
                         vibez.vibrate(C.Vibrate.VIBRATE_LOW);
                     }
@@ -204,35 +200,44 @@ public class SimpleGameEngine extends Activity {
             if (ourHolder.getSurface().isValid()) {
                 canvas = ourHolder.lockCanvas();
 
-                canvas.drawColor(Color.argb(255, 0, 0, 0));
+                // draw black background
+                canvas.drawColor(Colors.BLACK.getColor());
 
-                paint.setColor(Color.argb(255, 255, 255, 255));
 
                 // draw paddle
-                // 1080 x 1776
-                canvas.drawRect(paddle.getRect(), paint);
-                canvas.drawRect(paddle2.getRect(), paint);
+                paint.setColor(Colors.WHITE.getColor());
 
-                canvas.drawRect(0, screenY/2 - 10, screenX, screenY/2 + 10, paint);
+                // draw arena
+                canvas.drawRect(0, screenY / 2 - 10, screenX, screenY / 2 + 10, paint);
                 canvas.drawCircle(screenX / 2, screenY / 2, 150, paint);
-                paint.setColor(Color.argb(255, 0, 0, 0));
+                paint.setColor(Colors.BLACK.getColor());
                 canvas.drawCircle(screenX / 2, screenY / 2, 130, paint);
-                paint.setColor(Color.argb(255, 255, 255, 255));
 
+
+                // draw ball
                 if (rainbowBall) {
-                    paint.setColor(Color.argb(255, generator.nextInt(255), generator.nextInt(255), generator.nextInt(255)));
+                    paint.setColor(Colors.getRandomColor());
+                } else {
+                    paint.setColor(Colors.WHITE.getColor());
                 }
                 canvas.drawRect(ball.getRect(), paint);
 
-                paint.setColor(Color.argb(255, 0, 0, 0));
+                // draw paddles
+                paint.setColor(Colors.WHITE.getColor());
+                canvas.drawRect(paddle.getRect(), paint);
+                canvas.drawRect(paddle2.getRect(), paint);
+
+                // black layer covers ball if it goes below paddle
+                paint.setColor(Colors.BLACK.getColor());
                 canvas.drawRect(new RectF(paddle2.getRect().left, 0, paddle2.getRect().right, paddle2.getRect().top), paint);
                 canvas.drawRect(new RectF(paddle.getRect().left, paddle.getRect().bottom, paddle.getRect().right, screenY), paint);
 
-                paint.setColor(Color.argb(255, 0, 255, 0));
+                paint.setColor(Colors.GREEN.getColor());
 
-                paint.setTextSize(45);
-
-                canvas.drawText("FPS:" + fps, 20, 40, paint);
+                if (debug) {
+                    paint.setTextSize(45);
+                    canvas.drawText("FPS:" + fps, 20, 40, paint);
+                }
                 paint.setTextSize(100);
                 canvas.drawText(Integer.toString(p1_score), 0, screenY / 2 - 30, paint);
                 canvas.drawText(Integer.toString(p2_score), 0, screenY / 2 + 100, paint);

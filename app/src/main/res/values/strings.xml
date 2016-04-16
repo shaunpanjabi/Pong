@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">pong</string>
+    <string name="app_name">Pong</string>
+    <string name="menu_title">PONG</string>
+    <string name="menu_start">START</string>
 </resources>
