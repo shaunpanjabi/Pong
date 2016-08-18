@@ -21,6 +21,8 @@ public class Paddle {
 
     private int screenyX;
 
+    public boolean ai = false;
+
     public Paddle(int screenX, int screenY, int start_x, int start_y) {
         length = screenX * (float) 0.15;
         height = 30;
@@ -50,6 +52,8 @@ public class Paddle {
     }
 
     public void setPaddleSpeed(int speed) {paddleSpeed = speed; }
+
+    public void setAi(boolean aiSet) {ai = aiSet; }
 
     public void update(long fps){
         if(paddleMoving == LEFT) {

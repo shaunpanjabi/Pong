@@ -26,7 +26,6 @@ import java.util.Random;
 
 public class Menu extends Activity {
 
-    SoundPool sp;
     MenuView menuView;
 
     public class MenuView extends SurfaceView implements Runnable {
@@ -223,7 +222,6 @@ public class Menu extends Activity {
         super.onCreate(savedInstanceState);
         menuView = new MenuView(this);
         setContentView(menuView);
-        sp = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
 //        sp.setOnLoadCompleteListener();
     }
 

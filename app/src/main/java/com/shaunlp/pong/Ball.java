@@ -1,6 +1,7 @@
 package com.shaunlp.pong;
 
 import android.graphics.RectF;
+import android.util.Log;
 
 import java.util.Random;
 
@@ -8,12 +9,15 @@ public class Ball {
     RectF rect;
     float xVelocity;
     float yVelocity;
+    float maxyVelocity;
     float ballWidth = 30;
     float ballHeight = 30;
+    final private float startYVelocity = 1000;
 
     public Ball(int screenX, int screenY) {
         xVelocity = 500;
-        yVelocity = 1000;
+        yVelocity = startYVelocity;
+        maxyVelocity = 2000;
 
         rect = new RectF();
     }
@@ -40,7 +44,10 @@ public class Ball {
     }
 
     public void speedUpYVelocity(float percentage) {
-        yVelocity = yVelocity + (yVelocity*percentage);
+        if (yVelocity < maxyVelocity) {
+            Log.e("MAX", "MAX REACHED");
+            yVelocity = yVelocity + (yVelocity*percentage);
+        }
     }
 
     public void setPositiveYVelocity() {
@@ -91,12 +98,22 @@ public class Ball {
         rect.right = x+ballWidth;
     }
 
+    private double calculateDistanceBtwPoints(float x1, float y1, float x2, float y2) {
+        return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+    }
+    private void calculateStartingXVelocity(Paddle paddle, int screenX, int screenY) {
+        paddle.getRect().centerX();
+
+
+
+    }
+
     public void reset(int x, int y){
         rect.left = x / 2 - ballWidth / 2;
         rect.top = y / 2 + ballHeight / 2;
         rect.right = rect.left + ballWidth;
         rect.bottom = rect.top - ballHeight;
-        setxVelocity(500);
-        setyVelocity(1000);
+
+        setyVelocity(startYVelocity);
     }
 }

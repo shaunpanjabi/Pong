@@ -3,7 +3,6 @@ package com.shaunlp.pong;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.RectF;
@@ -73,6 +72,8 @@ public class SimpleGameEngine extends Activity {
 
             paddle2 = new Paddle(screenX, screenY, screenX/2, (int) paddingY); // top
             paddle = new Paddle(screenX, screenY, screenX / 2, screenY - (int) paddle2.getHeight() - (int) paddingY); // bottom
+            paddle2.ai = true;
+            paddle.ai = false;
             ball = new Ball(screenX, screenY);
 
             p1_score = 0;
@@ -115,10 +116,13 @@ public class SimpleGameEngine extends Activity {
                     } else {
                         piddler = paddle2;
                     }
-                    if (motionEvent.getX() > piddler.getRect().centerX()) {
-                        piddler.setMovementState(piddler.RIGHT);
-                    } else {
-                        piddler.setMovementState(piddler.LEFT);
+
+                    if (!piddler.ai) {
+                        if (motionEvent.getX() > piddler.getRect().centerX()) {
+                            piddler.setMovementState(piddler.RIGHT);
+                        } else {
+                            piddler.setMovementState(piddler.LEFT);
+                        }
                     }
                     break;
 
@@ -133,6 +137,24 @@ public class SimpleGameEngine extends Activity {
         public void update() {
             paddle.update(fps);
             paddle2.update(fps);
+
+            if (paddle2.ai) {
+                if (ball.getRect().centerX() > paddle2.getRect().centerX()) {
+                    paddle2.setMovementState(paddle2.RIGHT);
+                    } else if (ball.getRect().centerX() < paddle2.getRect().centerX()) {
+                    paddle2.setMovementState(paddle2.LEFT);
+                } else {
+                    paddle2.setMovementState(paddle2.STOPPED);
+                }
+            }
+
+            if (paddle.ai) {
+                if (ball.getRect().centerX() > paddle.getRect().centerX()) {
+                    paddle.setMovementState(paddle.RIGHT);
+                } else {
+                    paddle.setMovementState(paddle.LEFT);
+                }
+            }
 
             if(ball.getRect().left < 0){
                 Log.e("Action: ", "Wall collision");
@@ -181,7 +203,6 @@ public class SimpleGameEngine extends Activity {
                     ball.setPositiveYVelocity();
                     ball.clearObstacleY(paddle2.getRect().bottom + paddle2.getHeight());
                     ball.speedUpYVelocity((float) 0.1);
-
                 } else {
                     p2_score += 1;
                     p2_score += 1;
