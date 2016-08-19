@@ -12,7 +12,6 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.os.Vibrator;
 
 import java.util.Random;
 
@@ -22,7 +21,6 @@ import java.util.Random;
 
 public class SimpleGameEngine extends Activity {
     GameView gameView;
-    Vibrator vibez;
 
     public class GameView extends SurfaceView implements Runnable {
         private Thread gameThread = null;
@@ -157,58 +155,34 @@ public class SimpleGameEngine extends Activity {
             }
 
             if(ball.getRect().left < 0){
-                Log.e("Action: ", "Wall collision");
                 ball.reverseXVelocity();
                 ball.clearObstacleX(ball.getRect().width());
-
-                if (hapticFeedback) {
-                    vibez.vibrate(C.Vibrate.VIBRATE_LOW);
-                }
             }
 
             if(ball.getRect().right > screenX){
-                Log.e("Action: ", "Wall collision");
                 ball.reverseXVelocity();
                 ball.clearObstacleX(screenX - ball.getRect().width());
-                if (hapticFeedback) {
-                    vibez.vibrate(C.Vibrate.VIBRATE_LOW);
-                }
             }
 
             if(ball.getRect().bottom >= paddle.getRect().top){
-//                if(ball.getRect().left <= paddle.getRect().right && ball.getRect().centerX() >= paddle.getRect().left) {
                 if(ball.getRect().right >= paddle.getRect().left && ball.getRect().left <= paddle.getRect().right) {
-                    Log.e("Action: ", "Collision detected 3");
-                    if (hapticFeedback) {
-                        vibez.vibrate(C.Vibrate.VIBRATE_LOW);
-                    }
                     ball.setNegativeYVelocity();
                     ball.clearObstacleY(paddle.getRect().top);
                     ball.speedUpYVelocity((float) 0.1);
                 } else {
                     p1_score += 1;
-                    if (hapticFeedback) {
-                        vibez.vibrate(C.Vibrate.VIBRATE_LOW);
-                    }
                     ball.reset(screenX, screenY);
                 }
             }
 
             if(ball.getRect().top <= paddle2.getRect().bottom){
                 if(ball.getRect().right >= paddle2.getRect().left && ball.getRect().left <= paddle2.getRect().right) {
-                    Log.e("Action: ", "Collision detected 4");
-                    if (hapticFeedback) {
-                        vibez.vibrate(C.Vibrate.VIBRATE_LOW);
-                    }
                     ball.setPositiveYVelocity();
                     ball.clearObstacleY(paddle2.getRect().bottom + paddle2.getHeight());
                     ball.speedUpYVelocity((float) 0.1);
                 } else {
                     p2_score += 1;
                     p2_score += 1;
-                    if (hapticFeedback) {
-                        vibez.vibrate(C.Vibrate.VIBRATE_LOW);
-                    }
                     ball.reset(screenX, screenY);
                 }
             }
@@ -222,16 +196,16 @@ public class SimpleGameEngine extends Activity {
                 canvas = ourHolder.lockCanvas();
 
                 // draw black background
-                canvas.drawColor(Colors.BLACK.getColor());
+                canvas.drawColor(Colors.WHITE.getColor());
 
 
                 // draw paddle
-                paint.setColor(Colors.WHITE.getColor());
+                paint.setColor(Colors.HS_ORANGE.getColor());
 
                 // draw arena
                 canvas.drawRect(0, screenY / 2 - 10, screenX, screenY / 2 + 10, paint);
                 canvas.drawCircle(screenX / 2, screenY / 2, 150, paint);
-                paint.setColor(Colors.BLACK.getColor());
+                paint.setColor(Colors.WHITE.getColor());
                 canvas.drawCircle(screenX / 2, screenY / 2, 130, paint);
 
 
@@ -239,17 +213,17 @@ public class SimpleGameEngine extends Activity {
                 if (rainbowBall) {
                     paint.setColor(Colors.getRandomColor());
                 } else {
-                    paint.setColor(Colors.WHITE.getColor());
+                    paint.setColor(Colors.HS_ORANGE.getColor());
                 }
                 canvas.drawRect(ball.getRect(), paint);
 
                 // draw paddles
-                paint.setColor(Colors.WHITE.getColor());
+                paint.setColor(Colors.HS_ORANGE.getColor());
                 canvas.drawRect(paddle.getRect(), paint);
                 canvas.drawRect(paddle2.getRect(), paint);
 
                 // black layer covers ball if it goes below paddle
-                paint.setColor(Colors.BLACK.getColor());
+                paint.setColor(Colors.WHITE.getColor());
                 canvas.drawRect(new RectF(paddle2.getRect().left, 0, paddle2.getRect().right, paddle2.getRect().top), paint);
                 canvas.drawRect(new RectF(paddle.getRect().left, paddle.getRect().bottom, paddle.getRect().right, screenY), paint);
 
@@ -289,7 +263,6 @@ public class SimpleGameEngine extends Activity {
         super.onCreate(savedInstanceState);
         gameView = new GameView(this);
         setContentView(gameView);
-        vibez = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
     }
 
     @Override

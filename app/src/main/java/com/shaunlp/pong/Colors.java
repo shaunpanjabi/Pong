@@ -8,7 +8,8 @@ import java.util.Random;
 public enum Colors {
     BLACK(255, 0, 0, 0),
     WHITE(255, 255, 255, 255),
-    GREEN(255, 0 ,255, 0);
+    GREEN(255, 0 ,255, 0),
+    HS_ORANGE(255, 244, 125, 49);
 
     private final int alpha;
     private final int r;

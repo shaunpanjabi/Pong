@@ -8,21 +8,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.view.ViewGroup;
 import android.view.SurfaceView;
-import android.media.MediaPlayer;
-import android.media.SoundPool;
-
 import java.util.ArrayList;
-import java.util.Random;
-
-// TODO: Fix soundpool lag
 
 public class Menu extends Activity {
 
@@ -154,12 +146,12 @@ public class Menu extends Activity {
                 canvas = ourHolder.lockCanvas();
 
                 // Bottom layer == black
-                canvas.drawColor(Color.argb(255, 0, 0, 0));
+                canvas.drawColor(Colors.WHITE.getColor());
 
                 paint.setColor(Color.argb(255, 255, 255, 255));
 
                 for (int i=0; i < ballBuff.size(); i++) {
-                    paint.setColor(Colors.getRandomColor());
+                    paint.setColor(Colors.HS_ORANGE.getColor());
                     canvas.drawRect(ballBuff.get(i).getRect(), paint);
                 }
 
@@ -181,12 +173,12 @@ public class Menu extends Activity {
                     panCount -= 5;
                 } else {
                     canvas.drawRect(textContainer, paint);
-                    paint.setColor(Color.argb(255, 0, 255, 0));
+                    paint.setColor(Colors.getRandomColor());
                     canvas.drawText(PONG_START_TEXT, screenX / 2, screenY * (float) 0.80, paint);
                 }
                 paint.setTextSize(screenX / 4);
                 canvas.drawText(PONG_TITLE_TEXT, screenX/2, panCount, paint);
-                paint.setColor(Colors.getRandomColor());
+                paint.setColor(Colors.HS_ORANGE.getColor());
                 canvas.drawText(PONG_TITLE_TEXT, screenX/2 + 10, panCount + 10, paint);
                 ourHolder.unlockCanvasAndPost(canvas);
             }
